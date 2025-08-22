@@ -285,7 +285,7 @@ local function startAutoAttack()
                     end)
                 end
             end
-            wait(1) -- 每次攻擊後等待1秒
+            wait(0.7) -- 每次攻擊後等待0.7秒
         end
     end)
 end
