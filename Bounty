@@ -35,7 +35,7 @@ Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 15)
 -- 修正：標題樣式
 local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
-Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
+Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "✨ 貓玲的腳本區 ✨"
 Title.Font = Enum.Font.GothamBold
@@ -60,7 +60,6 @@ Close.Font = Enum.Font.GothamBold
 Close.TextSize = 18
 Close.BorderSizePixel = 0
 
--- 添加關閉按鈕效果
 local closeGradient = Instance.new("UIGradient", Close)
 closeGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 60, 60)),
@@ -69,13 +68,12 @@ closeGradient.Color = ColorSequence.new{
 
 Instance.new("UICorner", Close).CornerRadius = UDim.new(0, 8)
 
--- 修正：關閉按鈕功能
 Close.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
-    _G.maolingHubLoaded = false -- 重置載入狀態
+    _G.maolingHubLoaded = false
 end)
 
--- 修正：最小化按鈕樣式
+-- 最小化按鈕
 local Minimize = Instance.new("TextButton", Frame)
 Minimize.Size = UDim2.new(0, 35, 0, 35)
 Minimize.Position = UDim2.new(1, -80, 0, 8)
@@ -94,7 +92,7 @@ minimizeGradient.Color = ColorSequence.new{
 
 Instance.new("UICorner", Minimize).CornerRadius = UDim.new(0, 8)
 
--- 修正：側邊欄為可滾動
+-- 側邊欄
 local SideBar = Instance.new("ScrollingFrame", Frame)
 SideBar.Size = UDim2.new(0, 130, 1, -55)
 SideBar.Position = UDim2.new(0, 5, 0, 50)
@@ -105,7 +103,6 @@ SideBar.CanvasSize = UDim2.new(0, 0, 0, 200)
 SideBar.AutomaticCanvasSize = Enum.AutomaticSize.Y
 SideBar.ScrollingDirection = Enum.ScrollingDirection.Y
 
--- 添加側邊欄樣式
 local sidebarGradient = Instance.new("UIGradient", SideBar)
 sidebarGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 50)),
@@ -114,12 +111,11 @@ sidebarGradient.Color = ColorSequence.new{
 
 Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 10)
 
--- 添加UIListLayout到側邊欄
 local sidebarLayout = Instance.new("UIListLayout", SideBar)
 sidebarLayout.Padding = UDim.new(0, 8)
 sidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
--- 修正：內容區域
+-- 內容區域
 local Content = Instance.new("Frame", Frame)
 Content.Size = UDim2.new(1, -145, 1, -55)
 Content.Position = UDim2.new(0, 140, 0, 50)
@@ -134,7 +130,7 @@ contentGradient.Color = ColorSequence.new{
 
 Instance.new("UICorner", Content).CornerRadius = UDim.new(0, 10)
 
--- 修正：縮小功能的尺寸
+-- 縮小功能
 local isMinimized = false
 local fullSize = UDim2.new(0, 450, 0, 350)
 local miniSize = UDim2.new(0, 450, 0, 50)
@@ -146,94 +142,43 @@ Minimize.MouseButton1Click:Connect(function()
     Frame.Size = isMinimized and miniSize or fullSize
 end)
 
--- 修正：簡單高亮文字的分區按鈕樣式
+-- 分區按鈕樣式
 local function createSectionButton(text, order, parent)
     local btn = Instance.new("TextButton", parent)
     btn.Size = UDim2.new(0, 120, 0, 45)
     btn.Text = text
-    btn.BackgroundColor3 = Color3.fromRGB(85, 85, 105)  -- 比原本更亮的背景
-    
-    -- 最亮的文字設定
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)  -- 純白色
-    btn.TextTransparency = 0  -- 完全不透明
-    btn.Font = Enum.Font.GothamBold  -- 粗體字
-    btn.TextSize = 16  -- 適中大小
+    btn.BackgroundColor3 = Color3.fromRGB(85, 85, 105)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextTransparency = 0
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 16
     btn.BorderSizePixel = 0
-    
-    -- 添加圓角
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-    
-    -- 簡化描邊
     local btnStroke = Instance.new("UIStroke", btn)
     btnStroke.Color = Color3.fromRGB(150, 180, 255)
     btnStroke.Thickness = 1
     btnStroke.Transparency = 0.6
-    
-    -- 簡單hover效果
     btn.MouseEnter:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(105, 105, 125)  -- hover時更亮
+        btn.BackgroundColor3 = Color3.fromRGB(105, 105, 125)
         btnStroke.Transparency = 0.3
     end)
-    
     btn.MouseLeave:Connect(function()
         btn.BackgroundColor3 = Color3.fromRGB(85, 85, 105)
         btnStroke.Transparency = 0.6
     end)
-    
     return btn
 end
 
--- 修正：簡單高亮文字的一般按鈕樣式
-local function createButton(text, order, parent, spacing)
-    local btn = Instance.new("TextButton", parent)
-    btn.Size = UDim2.new(0, 180, 0, 35)
-    btn.Position = UDim2.new(0.5, -90, 0, 10 + (order - 1) * spacing)
-    btn.Text = text
-    btn.BackgroundColor3 = Color3.fromRGB(80, 140, 220)  -- 比原本更亮的背景
-    
-    -- 最亮的文字設定
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)  -- 純白色
-    btn.TextSize = 16  -- 適中大小
-    btn.Font = Enum.Font.GothamBold  -- 粗體字
-    btn.BorderSizePixel = 0
-    
-    -- 添加圓角
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-    
-    -- 簡化描邊
-    local btnStroke = Instance.new("UIStroke", btn)
-    btnStroke.Color = Color3.fromRGB(120, 170, 255)
-    btnStroke.Thickness = 1
-    btnStroke.Transparency = 0.6
-    
-    -- 簡單hover效果
-    btn.MouseEnter:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(100, 160, 240)  -- hover時更亮
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)  -- 保持純白
-        btnStroke.Transparency = 0.3
-    end)
-    
-    btn.MouseLeave:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(80, 140, 220)
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)  -- 保持純白
-        btnStroke.Transparency = 0.6
-    end)
-    
-    return btn
-end
-
--- 添加滾動框樣式改善
+-- 滾動框樣式
 local function styleScrollFrame(scrollFrame)
     scrollFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
     scrollFrame.BorderSizePixel = 0
     scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 150, 255)
-    
     local scrollGradient = Instance.new("UIGradient", scrollFrame)
     scrollGradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 65)),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(55, 55, 80))
     }
-    
     Instance.new("UICorner", scrollFrame).CornerRadius = UDim.new(0, 8)
 end
 
@@ -244,17 +189,16 @@ local savedPosition = nil
 local savedCFrame = nil
 local positionLockConnection = nil
 
--- 自動攻擊功能
+-- 賞金刷巴掌功能變數
+local bountyGeneralHitEnabled = false
+
+-- 自動攻擊功能（原版 HitmanHit）
 local function findClosestTarget()
     local character = LocalPlayer.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then
-        return nil
-    end
-    
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return nil end
     local myPosition = character.HumanoidRootPart.Position
     local closestPlayer = nil
-    local closestDistance = 15 -- 15單位內
-    
+    local closestDistance = 15
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local distance = (player.Character.HumanoidRootPart.Position - myPosition).Magnitude
@@ -264,52 +208,32 @@ local function findClosestTarget()
             end
         end
     end
-    
     return closestPlayer
 end
 
--- 自動攻擊循環
 local function startAutoAttack()
     spawn(function()
         while autoAttackEnabled do
-            if autoAttackEnabled then
-                local target = findClosestTarget()
-                if target and target.Character and target.Character:FindFirstChild("Right Arm") then
-                    local args = {
-                        [1] = target.Character:FindFirstChild("Right Arm")
-                    }
-                    
-                    -- 安全調用，避免錯誤
-                    pcall(function()
-                        game:GetService("ReplicatedStorage").HitmanHit:FireServer(unpack(args))
-                    end)
-                end
+            local target = findClosestTarget()
+            if target and target.Character and target.Character:FindFirstChild("Right Arm") then
+                pcall(function()
+                    game:GetService("ReplicatedStorage").HitmanHit:FireServer(target.Character:FindFirstChild("Right Arm"))
+                end)
             end
-            wait(0.7) -- 每次攻擊後等待0.7秒
+            wait(0.7)
         end
     end)
 end
 
--- 位置鎖定功能
+-- 位置鎖定
 local function togglePositionLock()
-    print("togglePositionLock 被調用，當前狀態:", positionLocked) -- 調試用
-    
     local character = LocalPlayer.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then
-        print("角色或HumanoidRootPart不存在") -- 調試用
-        return
-    end
-    
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     local humanoidRootPart = character.HumanoidRootPart
-    
     if not positionLocked then
-        print("開啟位置鎖定") -- 調試用
-        -- 保存當前位置和面向方向
         savedPosition = humanoidRootPart.Position
         savedCFrame = humanoidRootPart.CFrame
         positionLocked = true
-        
-        -- 持續鎖定位置
         positionLockConnection = game:GetService("RunService").Heartbeat:Connect(function()
             if positionLocked and character and character:FindFirstChild("HumanoidRootPart") then
                 character.HumanoidRootPart.CFrame = savedCFrame
@@ -317,150 +241,206 @@ local function togglePositionLock()
             end
         end)
     else
-        print("關閉位置鎖定") -- 調試用
         positionLocked = false
         if positionLockConnection then
             positionLockConnection:Disconnect()
             positionLockConnection = nil
         end
     end
-    
-    print("新狀態:", positionLocked) -- 調試用
+end
+
+-- 賞金刷巴掌：找最近目標並用 GeneralHit 打 Torso
+local function findClosestTargetForGeneralHit()
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return nil end
+    local myPosition = character.HumanoidRootPart.Position
+    local closestPlayer = nil
+    local closestDistance = math.huge
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (player.Character.HumanoidRootPart.Position - myPosition).Magnitude
+            if distance < closestDistance then
+                closestDistance = distance
+                closestPlayer = player
+            end
+        end
+    end
+    return closestPlayer
+end
+
+local function startBountyGeneralHit()
+    spawn(function()
+        while bountyGeneralHitEnabled do
+            local target = findClosestTargetForGeneralHit()
+            if target and target.Character and target.Character:FindFirstChild("Torso") then
+                pcall(function()
+                    game:GetService("ReplicatedStorage").GeneralHit:FireServer(
+                        target.Character["Torso"]
+                    )
+                end)
+            end
+            wait(0.8)
+        end
+    end)
 end
 
 -- ===== 創建賞金區域內容 =====
 local function createBountyContent()
-    -- 清空內容區域
     for _, child in pairs(Content:GetChildren()) do
-        if child:IsA("GuiObject") then
-            child:Destroy()
-        end
+        if child:IsA("GuiObject") then child:Destroy() end
     end
-    
-    -- 創建滾動框
+
     local scrollFrame = Instance.new("ScrollingFrame", Content)
     scrollFrame.Size = UDim2.new(1, -10, 1, -10)
     scrollFrame.Position = UDim2.new(0, 5, 0, 5)
     scrollFrame.ScrollBarThickness = 6
-    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 200)
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
     styleScrollFrame(scrollFrame)
-    
-    -- 自動攻擊按鈕
+
+    -- ── 自動攻擊按鈕（原版） ──
     local autoAttackBtn = Instance.new("TextButton", scrollFrame)
     autoAttackBtn.Size = UDim2.new(0, 180, 0, 35)
     autoAttackBtn.Position = UDim2.new(0.5, -90, 0, 10)
     autoAttackBtn.Text = "自動攻擊: 關閉"
-    autoAttackBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60) -- 初始為紅色（關閉）
+    autoAttackBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
     autoAttackBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     autoAttackBtn.TextSize = 16
     autoAttackBtn.Font = Enum.Font.GothamBold
     autoAttackBtn.BorderSizePixel = 0
     Instance.new("UICorner", autoAttackBtn).CornerRadius = UDim.new(0, 8)
-    
+
     autoAttackBtn.MouseButton1Click:Connect(function()
         autoAttackEnabled = not autoAttackEnabled
-        
         if autoAttackEnabled then
             autoAttackBtn.Text = "自動攻擊: 開啟"
-            autoAttackBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40) -- 暗綠色（開啟）
+            autoAttackBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40)
             startAutoAttack()
         else
             autoAttackBtn.Text = "自動攻擊: 關閉"
-            autoAttackBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60) -- 紅色（關閉）
-            -- 當關閉時，autoAttackEnabled變為false，while循環會自動停止
+            autoAttackBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
         end
     end)
-    
-    -- 設置新的 hover 效果
     autoAttackBtn.MouseEnter:Connect(function()
-        if autoAttackEnabled then
-            autoAttackBtn.BackgroundColor3 = Color3.fromRGB(60, 180, 60) -- hover暗綠色
-        else
-            autoAttackBtn.BackgroundColor3 = Color3.fromRGB(240, 80, 80) -- hover紅色
-        end
+        autoAttackBtn.BackgroundColor3 = autoAttackEnabled and Color3.fromRGB(60, 180, 60) or Color3.fromRGB(240, 80, 80)
     end)
-    
     autoAttackBtn.MouseLeave:Connect(function()
-        if autoAttackEnabled then
-            autoAttackBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40) -- 暗綠色
-        else
-            autoAttackBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60) -- 紅色
-        end
+        autoAttackBtn.BackgroundColor3 = autoAttackEnabled and Color3.fromRGB(40, 150, 40) or Color3.fromRGB(220, 60, 60)
     end)
-    
-    -- 固定位置按鈕
+
+    -- ── 固定位置按鈕 ──
     local positionBtn = Instance.new("TextButton", scrollFrame)
     positionBtn.Size = UDim2.new(0, 180, 0, 35)
     positionBtn.Position = UDim2.new(0.5, -90, 0, 60)
     positionBtn.Text = "固定位置: 關閉"
-    positionBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60) -- 初始為紅色（關閉）
+    positionBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
     positionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     positionBtn.TextSize = 16
     positionBtn.Font = Enum.Font.GothamBold
     positionBtn.BorderSizePixel = 0
     Instance.new("UICorner", positionBtn).CornerRadius = UDim.new(0, 8)
-    
+
     positionBtn.MouseButton1Click:Connect(function()
-        print("位置按鈕被點擊") -- 調試用
         togglePositionLock()
-        
-        print("按鈕更新前，positionLocked =", positionLocked) -- 調試用
-        
         if positionLocked then
             positionBtn.Text = "固定位置: 開啟"
-            positionBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40) -- 暗綠色（開啟）
-            print("按鈕設為開啟狀態") -- 調試用
+            positionBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40)
         else
             positionBtn.Text = "固定位置: 關閉"
-            positionBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60) -- 紅色（關閉）
-            print("按鈕設為關閉狀態") -- 調試用
+            positionBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
         end
     end)
-    
-    -- 設置新的 hover 效果
     positionBtn.MouseEnter:Connect(function()
-        if positionLocked then
-            positionBtn.BackgroundColor3 = Color3.fromRGB(60, 180, 60) -- hover暗綠色
-        else
-            positionBtn.BackgroundColor3 = Color3.fromRGB(240, 80, 80) -- hover紅色
-        end
+        positionBtn.BackgroundColor3 = positionLocked and Color3.fromRGB(60, 180, 60) or Color3.fromRGB(240, 80, 80)
     end)
-    
     positionBtn.MouseLeave:Connect(function()
-        if positionLocked then
-            positionBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40) -- 暗綠色
-        else
-            positionBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60) -- 紅色
-        end
+        positionBtn.BackgroundColor3 = positionLocked and Color3.fromRGB(40, 150, 40) or Color3.fromRGB(220, 60, 60)
     end)
-    
-    -- 提示文字
+
+    -- 提示文字（分隔線上方）
     local hintLabel = Instance.new("TextLabel", scrollFrame)
     hintLabel.Size = UDim2.new(0, 280, 0, 25)
-    hintLabel.Position = UDim2.new(0.5, -140, 0, 120)
+    hintLabel.Position = UDim2.new(0.5, -140, 0, 103)
     hintLabel.BackgroundTransparency = 1
     hintLabel.Text = "防虛空在常用區！"
     hintLabel.Font = Enum.Font.Gotham
     hintLabel.TextSize = 14
     hintLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
     hintLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+    -- ── 分隔線 ──
+    local dividerContainer = Instance.new("Frame", scrollFrame)
+    dividerContainer.Size = UDim2.new(0, 280, 0, 30)
+    dividerContainer.Position = UDim2.new(0.5, -140, 0, 133)
+    dividerContainer.BackgroundTransparency = 1
+
+    local leftLine = Instance.new("Frame", dividerContainer)
+    leftLine.Size = UDim2.new(0, 65, 0, 2)
+    leftLine.Position = UDim2.new(0, 0, 0.5, -1)
+    leftLine.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+    leftLine.BorderSizePixel = 0
+    Instance.new("UICorner", leftLine).CornerRadius = UDim.new(0, 2)
+
+    local dividerLabel = Instance.new("TextLabel", dividerContainer)
+    dividerLabel.Size = UDim2.new(0, 140, 1, 0)
+    dividerLabel.Position = UDim2.new(0.5, -70, 0, 0)
+    dividerLabel.BackgroundTransparency = 1
+    dividerLabel.Text = "賞金刷巴掌用"
+    dividerLabel.Font = Enum.Font.GothamBold
+    dividerLabel.TextSize = 13
+    dividerLabel.TextColor3 = Color3.fromRGB(160, 200, 255)
+    dividerLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+    local rightLine = Instance.new("Frame", dividerContainer)
+    rightLine.Size = UDim2.new(0, 65, 0, 2)
+    rightLine.Position = UDim2.new(1, -65, 0.5, -1)
+    rightLine.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+    rightLine.BorderSizePixel = 0
+    Instance.new("UICorner", rightLine).CornerRadius = UDim.new(0, 2)
+
+    -- ── 自動攻擊(賞金) 按鈕 ──
+    local bountyHitBtn = Instance.new("TextButton", scrollFrame)
+    bountyHitBtn.Size = UDim2.new(0, 180, 0, 35)
+    bountyHitBtn.Position = UDim2.new(0.5, -90, 0, 178)
+    bountyHitBtn.Text = "自動攻擊(賞金): 關閉"
+    bountyHitBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
+    bountyHitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    bountyHitBtn.TextSize = 14
+    bountyHitBtn.Font = Enum.Font.GothamBold
+    bountyHitBtn.BorderSizePixel = 0
+    Instance.new("UICorner", bountyHitBtn).CornerRadius = UDim.new(0, 8)
+
+    bountyHitBtn.MouseButton1Click:Connect(function()
+        bountyGeneralHitEnabled = not bountyGeneralHitEnabled
+        if bountyGeneralHitEnabled then
+            bountyHitBtn.Text = "自動攻擊(賞金): 開啟"
+            bountyHitBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40)
+            startBountyGeneralHit()
+        else
+            bountyHitBtn.Text = "自動攻擊(賞金): 關閉"
+            bountyHitBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
+        end
+    end)
+    bountyHitBtn.MouseEnter:Connect(function()
+        bountyHitBtn.BackgroundColor3 = bountyGeneralHitEnabled and Color3.fromRGB(60, 180, 60) or Color3.fromRGB(240, 80, 80)
+    end)
+    bountyHitBtn.MouseLeave:Connect(function()
+        bountyHitBtn.BackgroundColor3 = bountyGeneralHitEnabled and Color3.fromRGB(40, 150, 40) or Color3.fromRGB(220, 60, 60)
+    end)
+
 end
 
--- ===== 創建賞金分區按鈕 =====
+-- ===== 側邊欄按鈕 =====
 local bountyBtn = createSectionButton("賞金", 1, SideBar)
 
--- 點擊賞金按鈕時載入內容
 bountyBtn.MouseButton1Click:Connect(function()
     createBountyContent()
-    
-    -- 視覺反饋：短暫高亮
     bountyBtn.BackgroundColor3 = Color3.fromRGB(120, 180, 255)
     wait(0.1)
     bountyBtn.BackgroundColor3 = Color3.fromRGB(85, 85, 105)
 end)
 
--- 默認載入賞金區域
+-- 預設載入賞金區域
 createBountyContent()
 
 print("貓玲Hub載入完成！賞金區域已添加。")
