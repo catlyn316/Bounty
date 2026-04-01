@@ -188,11 +188,126 @@ local positionLocked = false
 local savedPosition = nil
 local savedCFrame = nil
 local positionLockConnection = nil
+local positionMode = "normal" -- "normal" | "helper" | "bounty"
 
 -- 賞金刷巴掌功能變數
 local bountyGeneralHitEnabled = false
 
--- 自動攻擊功能（原版 HitmanHit）
+-- ===== 輔助函式 =====
+
+-- 取得玩家的 Glove leaderstat
+local function getGlove(player)
+    local leaderstats = player:FindFirstChild("leaderstats")
+    if leaderstats then
+        local glove = leaderstats:FindFirstChild("Glove")
+        if glove then return glove.Value end
+    end
+    return nil
+end
+
+-- 找離自己最近的其他玩家（無距離限制）
+local function findAbsoluteClosestPlayer()
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return nil end
+    local myPos = character.HumanoidRootPart.Position
+    local closest, closestDist = nil, math.huge
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (p.Character.HumanoidRootPart.Position - myPos).Magnitude
+            if dist < closestDist then
+                closestDist = dist
+                closest = p
+            end
+        end
+    end
+    return closest
+end
+
+-- 讓角色躺下（在給定 CFrame 基礎上繞 X 軸旋轉 90 度）
+local function makeLaidCFrame(cf)
+    return cf * CFrame.Angles(math.rad(90), 0, 0)
+end
+
+-- ===== 新版固定位置 =====
+-- posBtn 是按鈕引用，用於更新文字
+local function togglePositionLock(posBtn)
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = character.HumanoidRootPart
+
+    if not positionLocked then
+        -- 判斷模式
+        local myGlove = getGlove(LocalPlayer)
+        local closestPlayer = findAbsoluteClosestPlayer()
+        local closestGlove = closestPlayer and getGlove(closestPlayer) or nil
+
+        if myGlove == "Bounty" then
+            -- 模式：賞金位置 —— 自己是 Bounty，躺在最近玩家上方 2 單位並固定
+            positionMode = "bounty"
+            posBtn.Text = "賞金位置: 開啟"
+
+            -- 設置位置後直接存入 savedCFrame，之後固定不跟隨
+            if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local targetPos = closestPlayer.Character.HumanoidRootPart.Position
+                local aboveCF = makeLaidCFrame(CFrame.new(targetPos + Vector3.new(0, 2, 0)))
+                hrp.CFrame = aboveCF
+                savedCFrame = aboveCF
+            else
+                savedCFrame = hrp.CFrame
+            end
+
+        elseif closestGlove == "Bounty" then
+            -- 模式：賞金幫助 —— 最近玩家是 Bounty，自己躺下 + 重力 5000
+            positionMode = "helper"
+            posBtn.Text = "賞金幫助: 開啟"
+
+            -- 先讓角色躺下再鎖定
+            local laidCF = makeLaidCFrame(hrp.CFrame)
+            hrp.CFrame = laidCF
+            savedCFrame = laidCF
+            workspace.Gravity = 5000
+
+        else
+            -- 模式：原版固定位置
+            positionMode = "normal"
+            posBtn.Text = "固定位置: 開啟"
+            savedCFrame = hrp.CFrame
+        end
+
+        savedPosition = hrp.Position
+        positionLocked = true
+        posBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40)
+
+        -- 啟動 Heartbeat 鎖定
+        positionLockConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not positionLocked then return end
+            if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+            -- 所有模式統一固定在 savedCFrame
+            character.HumanoidRootPart.CFrame = savedCFrame
+            character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+        end)
+
+    else
+        -- 解除鎖定
+        positionLocked = false
+        if positionLockConnection then
+            positionLockConnection:Disconnect()
+            positionLockConnection = nil
+        end
+
+        -- 解除 helper 模式的重力
+        if positionMode == "helper" then
+            workspace.Gravity = 196.2
+        end
+
+        positionMode = "normal"
+        posBtn.Text = "固定位置: 關閉"
+        posBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
+    end
+end
+
+-- ===== 自動攻擊功能 =====
 local function findClosestTarget()
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return nil end
@@ -223,30 +338,6 @@ local function startAutoAttack()
             wait(0.7)
         end
     end)
-end
-
--- 位置鎖定
-local function togglePositionLock()
-    local character = LocalPlayer.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    local humanoidRootPart = character.HumanoidRootPart
-    if not positionLocked then
-        savedPosition = humanoidRootPart.Position
-        savedCFrame = humanoidRootPart.CFrame
-        positionLocked = true
-        positionLockConnection = game:GetService("RunService").Heartbeat:Connect(function()
-            if positionLocked and character and character:FindFirstChild("HumanoidRootPart") then
-                character.HumanoidRootPart.CFrame = savedCFrame
-                character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-            end
-        end)
-    else
-        positionLocked = false
-        if positionLockConnection then
-            positionLockConnection:Disconnect()
-            positionLockConnection = nil
-        end
-    end
 end
 
 -- 賞金刷巴掌：找最近目標並用 GeneralHit 打 Torso
@@ -341,14 +432,8 @@ local function createBountyContent()
     Instance.new("UICorner", positionBtn).CornerRadius = UDim.new(0, 8)
 
     positionBtn.MouseButton1Click:Connect(function()
-        togglePositionLock()
-        if positionLocked then
-            positionBtn.Text = "固定位置: 開啟"
-            positionBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40)
-        else
-            positionBtn.Text = "固定位置: 關閉"
-            positionBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
-        end
+        -- 把按鈕本身傳進去，讓函式能改文字
+        togglePositionLock(positionBtn)
     end)
     positionBtn.MouseEnter:Connect(function()
         positionBtn.BackgroundColor3 = positionLocked and Color3.fromRGB(60, 180, 60) or Color3.fromRGB(240, 80, 80)
@@ -357,7 +442,7 @@ local function createBountyContent()
         positionBtn.BackgroundColor3 = positionLocked and Color3.fromRGB(40, 150, 40) or Color3.fromRGB(220, 60, 60)
     end)
 
-    -- 提示文字（分隔線上方）
+    -- 提示文字
     local hintLabel = Instance.new("TextLabel", scrollFrame)
     hintLabel.Size = UDim2.new(0, 280, 0, 25)
     hintLabel.Position = UDim2.new(0.5, -140, 0, 103)
